@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>じゃぱんカップ-BanPick-</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <meta property="og:title" content="じゃぱんカップ-BanPick-" />
+  <meta property="og:description" content="じゃぱんカップのBanPick画像を可視化するツールです" />
+  <meta property="og:image" content="https://fugarta.github.io/japancup-banpick/images/ogp.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://fugarta.github.io/japancup-banpick/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://fugarta.github.io/japancup-banpick/images/ogp.jpg" />
+
+
+</head>
+<body>
+  <div id="mainContainer">
+    <h1 class="title" contenteditable="true" spellcheck="false">じゃぱんカップ-BanPick-</h1>
+
+    <div id="tierList" class="tier-container">
+      <div class="tier" data-tier="1">
+        <div class="tier-label" contenteditable="true" spellcheck="false">チームA</div>
+        <div class="tier-row" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+      </div>
+      <div class="tier-row-horizontal">
+        <div class="tier" data-tier="2">
+          <div class="tier-label">Pick</div>
+          <div class="tier-row" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+          <div class="tier" data-tier="3">
+          <div class="tier-label">Ban</div>
+          <div class="tier-row" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+      </div>
+      <div class="tier" data-tier="4">
+        <div class="tier-label" contenteditable="true" spellcheck="false">チームB</div>
+        <div class="tier-row" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+      </div>
+      <div class="tier-row-horizontal">
+        <div class="tier" data-tier="5">
+          <div class="tier-label">Pick</div>
+          <div class="tier-row" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+          <div class="tier" data-tier="6">
+          <div class="tier-label">Ban</div>
+          <div class="tier-row" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="imagePool" class="pool" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <div class="pool-label">画像プール</div>
+    <div class="tier-row" id="poolRow"></div>
+  </div>
+
+  <div class="controls">
+    <input type="file" id="imageUpload" accept="image/*" multiple />
+    <button id="saveButton">BanPick画像を保存</button>
+    <button id="tweetButton">Twitterに投稿</button>
+      <p>画像をペースト（Ctrl+V）またはアップロードすることで、新しいテーマ画像を追加できます。<br />
+         画像プールから移動したテーマ画像は複製されます。 <br />
+         チームやBan、Pick 内から移動したテーマ画像は複製されません。<br />
+         チーム名は自由に変更することができます。<br />
+      </p>
+</div>
+
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <script type="module" src="script.js"></script>
+</body>
+</html>

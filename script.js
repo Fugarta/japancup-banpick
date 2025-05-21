@@ -1,0 +1,190 @@
+import { enableTouchDrag } from "./js/touch-support.js";
+
+function allowDrop(ev) {
+  ev.preventDefault();
+}
+window.allowDrop = allowDrop;
+
+function drag(ev) {
+  // ドラッグ対象のIDを設定
+  ev.dataTransfer.setData("text/plain", ev.target.id);
+  console.log("drag", ev.target.id);
+}
+
+function drop(ev) {
+  ev.preventDefault();
+  const id = ev.dataTransfer.getData("text/plain");
+  console.log("drop", id);
+
+  const dragged = document.getElementById(id)?.closest(".tier-item-wrapper");
+  const row = ev.target.closest(".tier-row");
+
+  if (!dragged || !row) return;
+
+  if (dragged.parentElement.id === "poolRow") {
+    // poolRow から tier-container にドロップされた場合はコピーを作成
+    const clone = dragged.cloneNode(true);
+    clone.id = `clone-${Date.now()}`; // 新しいIDを付与
+
+    // 子要素のIDも新しく設定
+    const childElements = clone.querySelectorAll("[id]");
+    childElements.forEach((child) => {
+      child.id = `${child.id}-clone-${Date.now()}`;
+    });
+
+    clone.setAttribute("draggable", "true");
+    clone.addEventListener("dragstart", drag);
+    console.log(clone);
+    row.appendChild(clone);
+  } else {
+    // tier-container 内での移動
+    const target = ev.target.closest(".tier-item-wrapper");
+
+    if (target && target !== dragged) {
+      // 他の tier-item-wrapper の上にドロップした場合、その前に挿入
+      row.insertBefore(dragged, target);
+    } else {
+      // 空きスペースにドロップした場合、末尾に移動
+      row.appendChild(dragged);
+    }
+  }
+}
+window.drop = drop;
+
+let itemCount = 0;
+const poolRow = document.getElementById("poolRow");
+
+// 初期画像のsrc一覧を保持
+let initialImageSrcs = [];
+
+function createImageElement(src, labelText = "") {
+  const wrapper = document.createElement("div");
+  wrapper.classList.add("tier-item-wrapper");
+
+  const img = document.createElement("img");
+  img.src = src;
+  img.classList.add("tier-item");
+  img.setAttribute("draggable", "true");
+  img.id = "item-" + itemCount++;
+  img.addEventListener("dragstart", drag);
+  img.addEventListener("touchstart", enableTouchDrag, { passive: false });
+
+  // 右クリック処理
+  img.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    const parent = wrapper.parentElement;
+    // 初期画像は削除不可
+    if (parent.id === "poolRow" && !initialImageSrcs.includes(img.src)) {
+      wrapper.remove(); // プール内なら削除
+    } else if (parent.id !== "poolRow") {
+      poolRow.appendChild(wrapper); // それ以外なら戻す
+    }
+  });
+
+  // ラベル要素を画像と一緒に作って重ねる
+  const label = document.createElement("input");
+  label.classList.add("label-overlay");
+  label.type = "text";
+  label.placeholder = "ラベル";
+  label.value = labelText;
+
+  wrapper.appendChild(img);
+  wrapper.appendChild(label);
+
+  return wrapper;
+}
+
+function addImageToPool(src, labelText = "", toFirst = false) {
+  const wrapper = createImageElement(src, labelText);
+  if (toFirst && poolRow.firstChild) {
+    poolRow.insertBefore(wrapper, poolRow.firstChild);
+  } else {
+    poolRow.appendChild(wrapper);
+  }
+}
+
+// 画像アップロード時
+document.getElementById("imageUpload").addEventListener("change", (event) => {
+  const files = event.target.files;
+  for (const file of files) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      addImageToPool(e.target.result, "", true); // 先頭に追加
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+// 画像ペースト時
+document.addEventListener("paste", (event) => {
+  const items = event.clipboardData.items;
+  for (const item of items) {
+    if (item.type.startsWith("image/")) {
+      const blob = item.getAsFile();
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        addImageToPool(e.target.result, "", true); // 先頭に追加
+      };
+      reader.readAsDataURL(blob);
+    }
+  }
+});
+
+// 初期化時はそのまま末尾に追加
+window.addEventListener("DOMContentLoaded", () => {
+  const initialImages = [
+    { src: "images/snake.png", label: "スネークアイ" },
+    { src: "images/blue.png", label: "青眼" },
+    { src: "images/hakai.png", label: "破械" },
+    { src: "images/memento.png", label: "メメント" },
+    { src: "images/kaiou.png", label: "海皇" },
+    { src: "images/whiteforest.png", label: "白き森" },
+    { src: "images/tenpai.png", label: "天盃" },
+    { src: "images/tiera.png", label: "ティアラ" },
+    { src: "images/yubel.png", label: "ユベル" },
+    { src: "images/rakuin.png", label: "烙印" },
+    { src: "images/rabu.png", label: "ラビュリンス" },
+    { src: "images/lightsworm.png", label: "ライトロード" },
+    { src: "images/reizyu.png", label: "霊獣" },
+    { src: "images/metabi.png", label: "メタビ" },
+    { src: "images/punk.png", label: "P.U.N.K." },
+    { src: "images/centyu.png", label: "センチュリオン" },
+    { src: "images/sprit.png", label: "スプライト" },
+    { src: "images/gimipape.png", label: "ギミパペ" },
+    { src: "images/dragonknight.png", label: "竜剣士" },
+    { src: "images/dyno.png", label: "ダイノルフィア" },
+    { src: "images/ensune.png", label: "炎スネ" }, 
+    { src: "images/smith.png", label: "スミスGS" },
+  ];
+  // 初期画像のsrcを絶対パスで保持
+  initialImageSrcs = initialImages.map(obj => {
+    const a = document.createElement('a');
+    a.href = obj.src;
+    return a.href;
+  });
+  initialImages.forEach(obj => {
+    addImageToPool(obj.src, obj.label); // 末尾に追加
+  });
+});
+
+document.getElementById("saveButton").addEventListener("click", () => {
+  html2canvas(document.getElementById("mainContainer")).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "tier-list.png";
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+});
+
+document.getElementById("tweetButton").addEventListener("click", () => {
+  const tweetText = encodeURIComponent("Tier Makerで自分だけのティア表を作りました\nhttps://fugarta.github.io/tier-maker/");
+  html2canvas(document.getElementById("mainContainer")).then(canvas => {
+    canvas.toBlob(blob => {
+      // 画像を一時的にアップロードする必要があるため、Twitter公式APIや外部サービスが必要です
+      // ここでは画像なしでテキスト投稿用のURLを生成します
+      // 画像付き投稿はTwitter API連携や外部アップローダが必要です
+      const url = "https://twitter.com/intent/tweet?text=" + tweetText;
+      window.open(url, "_blank");
+    });
+  });
+});
