@@ -36,9 +36,12 @@ export function enableTouchDrag(ev) {
     const dropArea = document
       .elementFromPoint(touch.clientX, touch.clientY)
       ?.closest('.tier');
+    const clone = draggingElem.cloneNode(true);
+    clone.id = `clone-${Date.now()}`; // 新しいIDを付与
+
     const dropTarget = dropArea?.querySelector('.tier-row');
     if (dropTarget) {
-      dropTarget.appendChild(draggingElem);
+      dropTarget.appendChild(clone);
     }
 
     // ドラッグ中の要素を元の位置に戻す
@@ -46,6 +49,11 @@ export function enableTouchDrag(ev) {
     draggingElem.style.left = '';
     draggingElem.style.top = '';
     draggingElem.style.position = '';
+
+    clone.classList.remove('touch-dragging');
+    clone.style.left = '';
+    clone.style.top = '';
+    clone.style.position = '';
     document.removeEventListener('touchmove', handleTouchMove);
     document.removeEventListener('touchend', handleTouchEnd);
   };
